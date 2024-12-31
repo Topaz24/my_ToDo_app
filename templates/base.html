@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To do</title>
+    <style>
+        body{
+            background-color: blanchedalmond;
+        }
+        .box{
+            width: 20px;
+            height: 20px;
+        }
+        #del {
+            background-color: rgb(120, 175, 175);
+            border-radius: 25%;
+        }
+        #dellast{
+            background-color: rgb(120, 175, 175);
+            border-radius: 25%;
+        }
+        #send{
+            background-color: rgb(111, 228, 228);
+            border-radius: 25%;
+        }
+        li{
+            font-size: large;
+            background-color:rgb(202, 174, 140);
+            color:rgb(10, 28, 59)
+        }
+        form{
+            color:rgb(10, 28, 59)
+        }
+        h1, h6{
+            background-color:rgb(202, 174, 140);
+            color:rgb(10, 28, 59)
+        }
+      
+    </style>
+</head>
+<body>
+    <h6>{{ current_date }}</h6>
+    <h1>To do list:</h1>
+    <hr>
+    <form method="post" style="font-size: larger;">
+        Enter here to add a task:<input type="text" name="task"> <input type="datetime-local" value="" name="due_date">
+        <button id="send" type="submit">send</button>
+    </form>
+    <form method="post">
+        <input type="hidden" name="delete last" value="True"> 
+        <button id="dellast" type="submit">Delete last</button>
+    </form>
+    <ol>
+        {% for item in arr %}
+            <li
+            {% if due_dates[arr.index(item)] is not none and due_dates[arr.index(item)] < current_date and not states[arr.index(item)] %}
+                style="background-color: rgb(202, 92, 92);"
+            { %else% }
+                style="background-color:rgb(202, 174, 140)" 
+            {% endif %}
+            >{{ item }} <span style="border: solid 2px;">{{ due_dates[arr.index(item)] }}</span>
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="delete" value="{{ item }}"> 
+                    <button id="del" type="submit">Delete</button>
+                </form>
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="done" value="{{ item }}">
+                    {% if item in arr and states[arr.index(item)] %}
+                        <button class="box" style="background-color: rgb(99, 187, 99);" type="submit"></button>
+                    {% else %}
+                        <button class="box" style="background-color: rgb(168, 40, 44);" type="submit"></button>
+                    {% endif %}
+                </form>
+            </li> 
+        {% endfor %}
+    </ol>
+</body>
+</html>
