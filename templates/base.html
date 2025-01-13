@@ -40,7 +40,7 @@
     </style>
 </head>
 <body>
-    <h6>{{ current_date }}</h6>
+    <h6>{{ current_date.strftime('%Y-%m-%d') }}</h6>
     <h1>To do list:</h1>
     <hr>
     <form method="post" style="font-size: larger;">
@@ -52,21 +52,22 @@
         <button id="dellast" type="submit">Delete last</button>
     </form>
     <ol>
-        {% for item in arr %}
+        {% for task in tasks %}
             <li
-            {% if due_dates[arr.index(item)] is not none and due_dates[arr.index(item)] < current_date and not states[arr.index(item)] %}
+            {% if task.due_date is not none and task.due_date < current_date and not task.done %}
                 style="background-color: rgb(202, 92, 92);"
-            { %else% }
+            {% else %}
                 style="background-color:rgb(202, 174, 140)" 
             {% endif %}
-            >{{ item }} <span style="border: solid 2px;">{{ due_dates[arr.index(item)] }}</span>
+            >
+            >{{ task.task }} <span style="border: solid 2px;">{{ task.due_date }}</span>
                 <form method="post" style="display: inline;">
-                    <input type="hidden" name="delete" value="{{ item }}"> 
+                    <input type="hidden" name="delete" value="{{ task.task }}"> 
                     <button id="del" type="submit">Delete</button>
                 </form>
                 <form method="post" style="display: inline;">
-                    <input type="hidden" name="done" value="{{ item }}">
-                    {% if item in arr and states[arr.index(item)] %}
+                    <input type="hidden" name="done" value="{{ task.task }}">
+                    {% if task.done %}
                         <button class="box" style="background-color: rgb(99, 187, 99);" type="submit"></button>
                     {% else %}
                         <button class="box" style="background-color: rgb(168, 40, 44);" type="submit"></button>
