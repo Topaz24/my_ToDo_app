@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 class TasksTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task = db.Column(db.String(200), nullable=False)
-    done = db.Column(db.Boolean, server_default=False)
+    done = db.Column(db.Boolean, default=False)
     due_date= db.Column(db.DateTime, nullable=True)
 
 # Initialize the database
@@ -46,14 +46,14 @@ def main():
 
         elif "delete" in request.form:
             to_delete=request.form["delete"]
-            task = TasksTable.query.filter_by(task=to_delete)
+            task = TasksTable.query.filter_by(task=to_delete).first()
             if task:
                 db.session.delete(task)
                 db.session.commit()
 
         elif "done" in request.form:
             toggle=request.form["done"]
-            task = TasksTable.query.filter_by(task=toggle.first())
+            task = TasksTable.query.filter_by(task=toggle).first()
             if task: #checks if the task object is not null
                 task.done = not task.done 
                 db.session.commit()
