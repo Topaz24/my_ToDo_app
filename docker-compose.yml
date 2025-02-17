@@ -1,0 +1,72 @@
+version: "3.9"
+services:
+  my_app1:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: myapp
+    container_name: app1-container
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=todo_user
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DATABASE=ToDoDB
+    networks:
+      - app-network
+      - db-network
+
+  my_app2:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: myapp
+    container_name: app2-container
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=todo_user
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DATABASE=ToDoDB
+    networks:
+      - app-network
+      - db-network
+    
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=todo_user
+      - MYSQL_PASSWORD=1234
+      - MYSQL_DATABASE=ToDoDB
+    volumes:
+      - mysql-data:/var/lib/mysql 
+    networks:
+      - db-network
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  nginx:
+    image: nginx:1.26.3
+    ports:
+      - "80:80"
+    depends_on:
+      - my_app1
+      - my_app2
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/templates/default.conf.template
+    environment:
+      - APP_1_HOST=my_app1
+      - APP_2_HOST=my_app2
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+  db-network:
+    driver: bridge 
+
+volumes:
+  mysql-data: 
