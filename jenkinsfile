@@ -1,6 +1,10 @@
 pipeline {
     agent any
-
+    environment {
+        IMAGE_NAME = 'toph2490/my_to_do_list'
+        VERSION = "${BUILD_NUMBER}"
+        email = 'toph2913@gmail.com'
+    }
     stages {
         stage('Build Docker Image') {
             steps {
@@ -22,12 +26,45 @@ pipeline {
                 sh '''
                     python3 -m venv .venv
                     . .venv/bin/activate
-                    pip install -r test/requirements.txt
-                    pytest ./test
+                    pip install -r tests/requirements.txt
+                    pytest ./testing
+                '''
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    script {
+                        docker.withRegistry('', 'docker-hub') {
+                            docker.image("${IMAGE_NAME}").push("${VERSION}")
+                            docker.image("${IMAGE_NAME}").push('latest')    
+                        }
+                    }
+                   }
+                }
+            }
+        }
+        post {
+             failure {
+                emailext(
+                    subject: "${JOB_NAME}.${BUILD_NUMBER} FAILED",
+                    mimeType: 'text/html',
+                    to: "$email",
+                    body: "${JOB_NAME}.${BUILD_NUMBER} FAILED"
+                )
+            }
+            success {
+                emailext(
+                    subject: "${JOB_NAME}.${BUILD_NUMBER} PASSED",
+                    mimeType: 'text/html',
+                    to: "$email",
+                    body: "${JOB_NAME}.${BUILD_NUMBER} PASSED"
+                )
+            }
+            always {
+                sh '''
+                    docker compose down || true
                 '''
             }
         }
     }
-
-
-}
