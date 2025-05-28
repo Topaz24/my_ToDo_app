@@ -55,7 +55,7 @@
         {% for task in tasks %}
             <li
             {% if task.due_date is not none and task.due_date < current_date and not task.done %}
-                style="background-color: rgb(201, 92, 92);"
+                style="background-color: rgb(202, 92, 92);"
             {% else %}
                 style="background-color:rgb(202, 174, 140)" 
             {% endif %}
