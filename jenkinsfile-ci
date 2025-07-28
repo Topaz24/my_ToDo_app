@@ -1,0 +1,107 @@
+pipeline {
+    agent any
+    environment {
+        IMAGE_NAME = 'toph2490/my_to_do_list'
+        VERSION = "${BUILD_NUMBER}"
+        email = 'toph2913@gmail.com'
+    }
+    
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t myapp ./app
+                    docker tag myapp ${IMAGE_NAME}:${VERSION}
+                    docker tag myapp ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+        stage('Run app with Docker compose') {
+            steps {
+                sh '''
+                    docker compose down || true
+                    docker compose up -d
+                '''
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                sh '''
+                    python3 -m venv .venv
+                    . .venv/bin/activate
+                    pip install -r tests/requirements.txt
+                    pytest ./tests
+                '''
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    script {
+                        docker.withRegistry('', 'docker-hub') {
+                            docker.image("${IMAGE_NAME}").push("${VERSION}")
+                            docker.image("${IMAGE_NAME}").push('latest')    
+                        }
+                    }
+                   }
+                }
+            }
+        
+        stage('Trigger CD by updating version') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                sh '''
+                    git config user.email "ci@bot.com"
+                    git config user.name "CI Bot"
+                    git clone https://${GIT_USER}:${GIT_PASS}@github.com/Topaz24/my_ToDo_app-CD.git
+                    cd my_ToDo_app-CD
+                    echo ${VERSION} > stage_version.txt
+                    git add stage_version.txt
+                    git commit -m "CI: Update staging version to ${VERSION}"
+                    git push origin main
+                '''
+        }
+    }
+}
+
+
+        }
+        
+    
+
+    }
+        post {
+             failure {
+                slackSend(
+                    channel: '#jenkins',
+                    color: 'danger',
+                    message: "${JOB_NAME}.${BUILD_NUMBER} FAILED"
+                )
+                
+                emailext(
+                    subject: "${JOB_NAME}.${BUILD_NUMBER} FAILED",
+                    mimeType: 'text/html',
+                    to: "$email",
+                    body: "${JOB_NAME}.${BUILD_NUMBER} FAILED"
+                )
+            }
+            success {
+                slackSend(
+                    channel: '#jenkins',
+                    color: 'good',
+                    message: "${JOB_NAME}.${BUILD_NUMBER} PASSED  http://stage.Topaz24.online/"
+                )
+                emailext(
+                    subject: "${JOB_NAME}.${BUILD_NUMBER} PASSED",
+                    mimeType: 'text/html',
+                    to: "$email",
+                    body: "${JOB_NAME}.${BUILD_NUMBER} PASSED"
+                )
+            }
+            always {
+                sh '''
+                    docker compose down || true
+                    docker rmi myapp || true
+                '''
+            }
+        }     
