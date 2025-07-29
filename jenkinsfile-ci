@@ -75,19 +75,19 @@ pipeline {
 
         }
         
-        post {
-    failure {
-        slackSend(
-            channel: '#ci-cd-pipeline',
-            color: 'danger',
-            message: "*${JOB_NAME}* build #${BUILD_NUMBER} ❌ FAILED\nDetails: ${BUILD_URL}"
-        )
+         post {
+        failure {
+            slackSend(
+                channel: '#ci-cd-pipeline',
+                color: 'danger',
+                message: "*${JOB_NAME}* build #${BUILD_NUMBER} ❌ FAILED\nDetails: ${BUILD_URL}"
+            )
+        }
+        success {
+            slackSend(
+                channel: '#ci-cd-pipeline',
+                color: 'good',
+                message: "*${JOB_NAME}* build #${BUILD_NUMBER} ✅ PASSED\nDeployed to: http://stage.Topaz24.online/"
+            )
+        }
     }
-    success {
-        slackSend(
-            channel: '#ci-cd-pipeline',
-            color: 'good',
-            message: "*${JOB_NAME}* build #${BUILD_NUMBER} ✅ PASSED\nDeployed to: http://stage.Topaz24.online/"
-        )
-    }
-}
