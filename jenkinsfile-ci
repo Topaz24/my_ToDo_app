@@ -87,7 +87,7 @@ pipeline {
             slackSend(
                 channel: '#ci-cd-pipeline',
                 color: 'good',
-                message: "*${JOB_NAME}* build #${BUILD_NUMBER} ✅ PASSED\nDeployed to: http://stage.Topaz24.online/"
+                message: "*${JOB_NAME}* build #${BUILD_NUMBER} ✅ PASSED\nDeployed"
             )
         }
     }
