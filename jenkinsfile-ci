@@ -9,7 +9,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker build -t myapp ./app
+                    docker build -t myapp .
                     docker tag myapp ${IMAGE_NAME}:${VERSION}
                     docker tag myapp ${IMAGE_NAME}:latest
                 '''
