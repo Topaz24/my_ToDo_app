@@ -3,7 +3,6 @@ pipeline {
     environment {
         IMAGE_NAME = 'toph2490/my_to_do_list'
         VERSION = "${BUILD_NUMBER}"
-        email = 'atopp7115@gmail.com'
     }
     
     stages {
@@ -71,26 +70,18 @@ pipeline {
         }
         
         post {
-             failure {
-                emailext(
-                    subject: "${JOB_NAME}.${BUILD_NUMBER} FAILED",
-                    mimeType: 'text/html',
-                    to: "$email",
-                    body: "${JOB_NAME}.${BUILD_NUMBER} FAILED"
-                )
-            }
-            success {
-                emailext(
-                    subject: "${JOB_NAME}.${BUILD_NUMBER} PASSED",
-                    mimeType: 'text/html',
-                    to: "$email",
-                    body: "${JOB_NAME}.${BUILD_NUMBER} PASSED  http://stage.Topaz24.online/"
-                )
-            }
-            always {
-                sh '''
-                    docker compose down || true
-                    docker rmi myapp || true
-                '''
-            }
-        }     
+    failure {
+        slackSend(
+            channel: '#ci-cd-pipeline',
+            color: 'danger',
+            message: "*${JOB_NAME}* build #${BUILD_NUMBER} ❌ FAILED\nDetails: ${BUILD_URL}"
+        )
+    }
+    success {
+        slackSend(
+            channel: '#ci-cd-pipeline',
+            color: 'good',
+            message: "*${JOB_NAME}* build #${BUILD_NUMBER} ✅ PASSED\nDeployed to: http://stage.Topaz24.online/"
+        )
+    }
+}
