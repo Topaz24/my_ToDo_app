@@ -47,29 +47,29 @@ pipeline {
                 }
             }
         
-        stage('Trigger CD by updating version') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                sh '''
-                    git config user.email "ci@bot.com"
-                    git config user.name "CI Bot"
-                    git clone https://${GIT_USER}:${GIT_PASS}@github.com/Topaz24/my_ToDo_app-CD.git
-                    cd my_ToDo_app-CD
-                    echo ${VERSION} > stage_version.txt
-                    git add stage_version.txt
-                    git commit -m "CI: Update staging version to ${VERSION}"
-                    git push origin main
-                '''
+       stage('Trigger CD by updating image tag') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+            sh '''
+                git config user.email "ci@bot.com"
+                git config user.name "CI Bot"
+                git clone https://${GIT_USER}:${GIT_PASS}@github.com/Topaz24/my_ToDo_app-CD.git
+                cd my_ToDo_app-CD
+                # Update the image tag in values-stage.yaml
+                sed -i "s/tag:.*/tag: \\"${VERSION}\\"/" values-stage.yaml
+                git add values-stage.yaml
+                git commit -m "CI: Update image tag to ${VERSION}"
+                git push origin main
+            '''
         }
     }
+}
+
 }
 
 
         }
         
-    
-
-    }
         post {
              failure {
                 emailext(
