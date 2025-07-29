@@ -56,6 +56,7 @@ pipeline {
     steps {
         withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
             sh '''
+                rm -rf my_ToDo_app-CD
                 git config user.email "ci@bot.com"
                 git config user.name "CI Bot"
                 git clone https://${GIT_USER}:${GIT_PASS}@github.com/Topaz24/my_ToDo_app-CD.git
