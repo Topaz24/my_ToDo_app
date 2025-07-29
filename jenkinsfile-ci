@@ -60,9 +60,8 @@ pipeline {
                 git config user.name "CI Bot"
                 git clone https://${GIT_USER}:${GIT_PASS}@github.com/Topaz24/my_ToDo_app-CD.git
                 cd my_ToDo_app-CD
-                # Update the image tag in values-stage.yaml
-                sed -i "s/tag:.*/tag: \\"${VERSION}\\"/" values-stage.yaml
-                git add values-stage.yaml
+                sed -i "s/tag:.*/tag: \\"${VERSION}\\"/" K8s/app-argoCD/todo-app/values.yaml
+                git add K8s/app-argoCD/todo-app/values.yaml
                 git commit -m "CI: Update image tag to ${VERSION}"
                 git push origin main
             '''
